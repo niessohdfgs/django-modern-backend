@@ -2,20 +2,15 @@ name: Django CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     services:
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-
       postgres:
         image: postgres:16
         env:
@@ -25,10 +20,22 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready"
+          --health-cmd "pg_isready -U blog_user"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    env:
+      DB_NAME: blog_db
+      DB_USER: blog_user
+      DB_PASSWORD: blog_pass
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
 
     steps:
       - name: Checkout code
@@ -41,17 +48,23 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run migrations
-        env:
-          DATABASE_URL: postgres://blog_user:blog_pass@localhost:5432/blog_db
+      - name: Wait for Postgres
         run: |
-          cd core
+          sudo apt-get install -y postgresql-client
+          until pg_isready -h 127.0.0.1 -p 5432 -U blog_user; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+
+      - name: Run migrations
+        working-directory: core
+        run: |
           python manage.py migrate
 
       - name: Run tests
+        working-directory: core
         run: |
-          cd core
           python manage.py test
