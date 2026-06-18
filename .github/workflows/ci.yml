@@ -37,6 +37,10 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
 
+      # 🔥 FIX IMPORTANT (Django crash fix)
+      SECRET_KEY: django-insecure-test-key
+      DEBUG: "0"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
