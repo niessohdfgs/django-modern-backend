@@ -1,0 +1,16 @@
+Django
+djangorestframework
+djangorestframework-simplejwt
+django-filter
+drf-spectacular
+psycopg2-binary
+python-dotenv
+python-dotenv
+python-decouple
+django-redis
+redis
+celery
+gunicorn
+channels
+channels-redis
+daphne
