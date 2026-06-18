@@ -48,8 +48,10 @@ jobs:
         env:
           DATABASE_URL: postgres://blog_user:blog_pass@localhost:5432/blog_db
         run: |
+          cd core
           python manage.py migrate
 
       - name: Run tests
         run: |
+          cd core
           python manage.py test
